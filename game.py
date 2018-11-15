@@ -1,11 +1,11 @@
 import pickle
 from enum import auto, Enum
 from utils import *
+from graphx import GraphX
 
-
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 400
-SLPIXEL = 10
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 600
+SLPIXEL = 15
 SLWIDTH = SCREEN_WIDTH // SLPIXEL
 SLHEIGHT = SCREEN_HEIGHT // SLPIXEL
 
@@ -64,11 +64,11 @@ class World:
         self.map[x][y] = block
 
     def load(self):
-        with open('maps/' + self.name, 'rb') as file:
+        with open('maps/' + self.name + '.sl', 'rb') as file:
             self.map = pickle.load(file)
 
     def save(self):
-        with open('maps/' + self.name, 'wb') as file:
+        with open('maps/' + self.name + '.sl', 'wb') as file:
             pickle.dump(self.map, file)
 
     def get(self, x, y):
@@ -176,3 +176,15 @@ class Playground:
         self.world = world
         self.players = [GreenPlayer(self.world.green()), RedPlayer(self.world.red())]
         self.sprites = []
+
+
+class Game:
+    def __init__(self, name):
+        self.world = World(name, SLWIDTH, SLHEIGHT)
+        self.pg = Playground(world)
+        self.gx = GraphX(pg=self.pg)
+        self.state = True
+
+    def run(self):
+        while self.state:
+            pass

@@ -1,13 +1,13 @@
 from graphx import *
 
 
-msg = '''
+keymap = '''
 ====KEYMAP====
 s - SAVE
 l - LOAD
-n - next block
-p - previous block
-lmb / d - draw
+> - next block
+< - previous block
+LMB / d - draw
 '''
 
 
@@ -24,23 +24,23 @@ def main():
     perm_n = True
     perm_p = True
 
-    print(msg)
-
+    print(keymap)
+    print(blocks[pick].desc)
     while True:
-        if pygame.key.get_pressed()[K_n] and perm_n:
+        if pygame.key.get_pressed()[K_LEFT] and perm_n:
 
             pick += 1
             pick = pick % len(blocks)
             print(blocks[pick].desc)
 
-        perm_n = not pygame.key.get_pressed()[K_n]
+        perm_n = not pygame.key.get_pressed()[K_LEFT]
 
-        if pygame.key.get_pressed()[K_p] and perm_p:
+        if pygame.key.get_pressed()[K_RIGHT] and perm_p:
             pick -= 1
             pick = pick % len(blocks)
             print(blocks[pick].desc)
 
-        perm_p = not pygame.key.get_pressed()[K_p]
+        perm_p = not pygame.key.get_pressed()[K_RIGHT]
 
         if pygame.key.get_pressed()[K_s]:
             name = input('Enter name > ')
