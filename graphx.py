@@ -1,19 +1,42 @@
-from enum import Enum
+import pygame
+from game import *
+from pygame.locals import *
+
+pygame.init()
 
 
-class Color(Enum):
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
-    YELLOW = (255, 255, 0)
-    WHITE = (255, 255, 255)
-    BLACK = (0, 0, 0)
-    GREY = (211, 211, 211)
-    ORANGE = (255, 165, 0)
+def draw_sq(surface, v, c, s):
+    r = pygame.Rect((v.x, v.y), (s, s))
+    pygame.draw.rect(surface, c, r)
 
 
-class Graph:
-    def __init__(self):
+class GraphX:
+    def __init__(self, pg=None, world=None):
+        self.ws = SCREEN_WIDTH
+        self.hs = SCREEN_HEIGHT
+        self.width = SLWIDTH
+        self.height = SLHEIGHT
+        self.pg = pg
+        if not pg:
+            self.world = world
+        else:
+            self.world = pg.world
 
+        self.screen = pygame.display.set_mode((self.ws, self.hs), 0, 32)
+        self.surface = pygame.Surface(self.screen.get_size())
+        self.surface = self.surface.convert()
+        self.surface.fill(WHITE)
 
+    def draw(self):
+        for x in range(self.width):
+            for y in range(self.height):
+                draw_sq(self.surface, slpixel_to_pixel(Vector(x, y)), self.world.map[x][y].color, SLPIXEL)
+        if self.pg:
+            for p in self.pg.players:
+                draw_sq(self.surface, slpixel_to_pixel(Vector(p.x, p.y)), p.color, p.size)
 
+            for s in self.pg.sprites:
+                draw_sq(self.surface, slpixel_to_pixel(Vector(s.x, s.y)), s.color, s.size)
+
+        self.screen.blit(self.surface, (0, 0))
+        pygame.display.flip()

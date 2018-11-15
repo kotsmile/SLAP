@@ -1,8 +1,8 @@
-from enum import Enum
+import math
 
 
 class Vector:
-    def __init__(self, x, y):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
@@ -16,8 +16,13 @@ class Vector:
         return Vector(a * self.x, a * self.y)
 
     def __abs__(self):
-        return self.x ** 2 + self.y ** 2
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def in_radius(self, radius, vector):
+        return radius >= abs(self - vector)
 
 
-
-
+UP = Vector(0, 1)
+DOWN = Vector(0, -1)
+RIGHT = Vector(1, 0)
+LEFT = Vector(-1, 0)
