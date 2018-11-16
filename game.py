@@ -1,39 +1,7 @@
 import pickle
 from enum import auto, Enum
-from utils import *
-from graphx import GraphX
-
-SCREEN_WIDTH = 900
-SCREEN_HEIGHT = 600
-SLPIXEL = 15
-SLWIDTH = SCREEN_WIDTH // SLPIXEL
-SLHEIGHT = SCREEN_HEIGHT // SLPIXEL
-
-
-def slpixel_to_pixel(v):
-    return Vector(v.x * SLPIXEL, v.y * SLPIXEL)
-
-
-def pixel_to_slpixel(v):
-    return Vector(v.x // SLPIXEL, v.y // SLPIXEL)
-
-
-class Block:
-    def __init__(self, color, desc, name):
-        self.color = color
-        self.desc = desc
-        self.name = name
-
-
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREY = (211, 211, 211)
-ORANGE = (255, 165, 0)
-BRIGHT_YELLOW = (255, 255, 150)
+from graphx import *
+import time
 
 
 class Result(Enum):
@@ -44,13 +12,12 @@ class Result(Enum):
     TICK = auto()
 
 
-BOX = Block(BLACK, 'box - solid block', 'box')
-AIR = Block(WHITE, 'air - transparent block', 'air')
-SMOKE = Block(GREY, 'smoke - non-transparent block', 'smoke')
-HOME = Block(GREEN, 'home - green spawn', 'home')
-BASE = Block(RED, 'base - red spawn', 'base')
-PLANT = Block(ORANGE, 'plant - plant zone', 'plant')
-TRAP = Block(YELLOW, 'trap', 'trap')
+class Action(Enum):
+    JUMP = auto()
+    LEFT = auto()
+    RIGHT = auto()
+    SHOOT_L = auto()
+    SHOOT_R = auto()
 
 
 class World:
@@ -64,35 +31,36 @@ class World:
         self.map[x][y] = block
 
     def load(self):
-        with open('maps/' + self.name + '.sl', 'rb') as file:
+        with open('maps/' + self.name + '.slw', 'rb') as file:
             self.map = pickle.load(file)
 
     def save(self):
-        with open('maps/' + self.name + '.sl', 'wb') as file:
+        with open('maps/' + self.name + '.slw', 'wb') as file:
             pickle.dump(self.map, file)
 
     def get(self, x, y):
         return self.map[x][y]
 
     def green(self):
+        print()
         for x in range(self.w):
             for y in range(self.h):
-                if self.map[x][y] is HOME:
-                    return pixel_to_slpixel(Vector(x, y))
+                if self.map[x][y].same(HOME):
+                    return slpixel_to_pixel(Vector(x, y))
 
     def red(self):
         for x in range(self.w):
             for y in range(self.h):
-                if self.map[x][y] is BASE:
-                    return pixel_to_slpixel(Vector(x, y))
+                if self.map[x][y].same(BASE):
+                    return slpixel_to_pixel(Vector(x, y))
 
 
 class Sprite:
-    def __init__(self, color):
+    def __init__(self, color, size):
         self.position = Vector()
         self.velocity = Vector()
         self.color = color
-        self.size = 1
+        self.size = size
 
     def update(self, pg):
         pass
@@ -100,14 +68,12 @@ class Sprite:
 
 class SmallSprite(Sprite):
     def __init__(self, color):
-        self.size = 1
-        Sprite.__init__(self, color)
+        Sprite.__init__(self, color, 1)
 
 
 class BigSprite(Sprite):
     def __init__(self, color):
-        self.size = SLPIXEL
-        Sprite.__init__(self, color)
+        Sprite.__init__(self, color, 15)
 
 
 class Bullet(SmallSprite):
@@ -126,7 +92,7 @@ class Bullet(SmallSprite):
 
 class Trap(BigSprite):
     def __init__(self):
-        Sprite.__init__(self, YELLOW)
+        BigSprite.__init__(self, YELLOW)
         self.radius = 1
 
     def update(self, pg):
@@ -137,7 +103,7 @@ class Trap(BigSprite):
 
 class Bomb(BigSprite):
     def __init__(self):
-        Sprite.__init__(self, BLUE)
+        BigSprite.__init__(self, BLUE)
         self.timer = 100
 
     def update(self, pg):
@@ -150,41 +116,103 @@ class Bomb(BigSprite):
 
 class Player(BigSprite):
     def __init__(self, color, spawn):
-        Sprite.__init__(self, color)
+        BigSprite.__init__(self, color)
         self.position = spawn
+        self.next_velocity = Vector(0, 0)
+        self.hp = 3
+        self.reload = 10
+        self.score = 0
 
     def update(self, pg):
-        # gravity force
-        pass
+        pos_d = pixel_to_slpixel(self.position) + Vector(0, 1)
+        if pg.world.get(pos_d.x, pos_d.y).same(AIR):
+            self.velocity += Vector(0, 1)
+            self.position += self.velocity
+        else:
+            self.velocity = Vector(0, 0)
 
-    def move(self, velocity):
-        self.position = self.position + velocity
+        pos = self.position
+        x_d = pos.x
+        y_d = pos.y
+
+        up_p = pos + Vector(0, -1)
+        left_p = pos + Vector(-1, 0)
+
+        if pg.world.get(pixel_to_slpixel(up_p).x. pixel_to_slpixel(up_p).y).same(BOX):
+            pass
+
+
+
+    def do(self, act, pg):
+        if act is Action.LEFT:
+            new_pos = self.position + Vector(-1, 0) * 5
+            slpos = pixel_to_slpixel(new_pos)
+            if not pg.world.get(slpos.x, slpos.y).same(BOX):
+                self.position = new_pos
+
+        elif act is Action.RIGHT:
+            new_pos = self.position + Vector(1, 0) * 5
+            slpos = pixel_to_slpixel(new_pos + Vector(SLPIXEL - 1, 0))
+            if not pg.world.get(slpos.x, slpos.y).same(BOX):
+                self.position = new_pos
+
+        elif act is Action.JUMP:
+            pos = pixel_to_slpixel(self.position) + Vector(0, 1)
+            if pg.world.get(pos.x, pos.y).same(BOX):
+                self.velocity += Vector(0, -15)
+                self.position += self.velocity
 
 
 class GreenPlayer(Player):
     def __init__(self, spawn):
-        Player.__init__(self, GREEN, spawn)
+        Player.__init__(self, DARK_GREEN, spawn)
 
 
 class RedPlayer(Player):
     def __init__(self, spawn):
-        Player.__init__(self, RED, spawn)
+        Player.__init__(self, DARK_RED, spawn)
 
 
 class Playground:
     def __init__(self, world):
         self.world = world
-        self.players = [GreenPlayer(self.world.green()), RedPlayer(self.world.red())]
+        self.world.load()
+        self.players = [GreenPlayer(self.world.green())]
         self.sprites = []
 
 
-class Game:
+class SLAPGame:
     def __init__(self, name):
         self.world = World(name, SLWIDTH, SLHEIGHT)
-        self.pg = Playground(world)
+        self.pg = Playground(self.world)
         self.gx = GraphX(pg=self.pg)
         self.state = True
 
+    def new(self):
+        pass
+
     def run(self):
         while self.state:
-            pass
+            self.gx.draw()
+            time.sleep(0.0001)
+            for event in pygame.event.get():
+
+                if event.type == QUIT:
+                    return
+
+            if pygame.key.get_pressed()[K_d]:
+                self.pg.players[0].do(Action.RIGHT, self.pg)
+
+            if pygame.key.get_pressed()[K_a]:
+                self.pg.players[0].do(Action.LEFT, self.pg)
+
+            if pygame.key.get_pressed()[K_SPACE]:
+                self.pg.players[0].do(Action.JUMP, self.pg)
+
+            if pygame.key.get_pressed()[K_LEFT]:
+                self.pg.players[0].do(Action.SHOOT_L, self.pg)
+
+            if pygame.key.get_pressed()[K_RIGHT]:
+                self.pg.players[0].do(Action.SHOOT_R, self.pg)
+
+            self.pg.players[0].update(self.pg)

@@ -1,12 +1,12 @@
 from graphx import *
-
+from game import World
 
 keymap = '''
 ====KEYMAP====
 s - SAVE
 l - LOAD
-> - next block
-< - previous block
+q - next block
+w - previous block
 LMB / d - draw
 '''
 
@@ -19,7 +19,7 @@ def main():
 
     pick = 1
 
-    blocks = [AIR, BOX, HOME, BASE, PLANT, SMOKE]
+    blocks = [AIR, BOX, HOME, BASE, PLANT, SMOKE, DEV]
 
     perm_n = True
     perm_p = True
@@ -27,20 +27,19 @@ def main():
     print(keymap)
     print(blocks[pick].desc)
     while True:
-        if pygame.key.get_pressed()[K_LEFT] and perm_n:
-
+        if pygame.key.get_pressed()[K_q] and perm_n:
             pick += 1
             pick = pick % len(blocks)
             print(blocks[pick].desc)
 
-        perm_n = not pygame.key.get_pressed()[K_LEFT]
+        perm_n = not pygame.key.get_pressed()[K_q]
 
-        if pygame.key.get_pressed()[K_RIGHT] and perm_p:
+        if pygame.key.get_pressed()[K_w] and perm_p:
             pick -= 1
             pick = pick % len(blocks)
             print(blocks[pick].desc)
 
-        perm_p = not pygame.key.get_pressed()[K_RIGHT]
+        perm_p = not pygame.key.get_pressed()[K_w]
 
         if pygame.key.get_pressed()[K_s]:
             name = input('Enter name > ')

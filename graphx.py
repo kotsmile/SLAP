@@ -1,8 +1,17 @@
 import pygame
-from game import *
 from pygame.locals import *
+from utils import *
+from vars import *
 
 pygame.init()
+
+
+def slpixel_to_pixel(v):
+    return Vector(v.x * SLPIXEL, v.y * SLPIXEL)
+
+
+def pixel_to_slpixel(v):
+    return Vector(v.x // SLPIXEL, v.y // SLPIXEL)
 
 
 def draw_sq(surface, v, c, s):
@@ -33,10 +42,10 @@ class GraphX:
                 draw_sq(self.surface, slpixel_to_pixel(Vector(x, y)), self.world.map[x][y].color, SLPIXEL)
         if self.pg:
             for p in self.pg.players:
-                draw_sq(self.surface, slpixel_to_pixel(Vector(p.x, p.y)), p.color, p.size)
+                draw_sq(self.surface, Vector(p.position.x, p.position.y), p.color, p.size)
 
             for s in self.pg.sprites:
-                draw_sq(self.surface, slpixel_to_pixel(Vector(s.x, s.y)), s.color, s.size)
+                draw_sq(self.surface, Vector(s.position.x, s.position.y), s.color, s.size)
 
         self.screen.blit(self.surface, (0, 0))
         pygame.display.flip()

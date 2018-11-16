@@ -22,7 +22,7 @@ class Vector:
         return radius >= abs(self - vector)
 
 
-UP = Vector(0, 1)
-DOWN = Vector(0, -1)
-RIGHT = Vector(1, 0)
-LEFT = Vector(-1, 0)
+# UP = Vector(0, 1)
+# DOWN = Vector(0, -1)
+# RIGHT = Vector(1, 0)
+# LEFT = Vector(-1, 0)
